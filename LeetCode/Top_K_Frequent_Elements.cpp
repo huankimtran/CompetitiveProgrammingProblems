@@ -13,6 +13,11 @@ Note:
 You may assume k is always valid, 1 ≤ k ≤ number of unique elements.
 Your algorithm's time complexity must be better than O(n log n), where n is the array's size.
 */
+#include "iostream"
+#include "unordered_map"
+#include "vector"
+#include "utility"
+using namespace std;
 template <typename T>
 class Node
 {
@@ -29,8 +34,7 @@ class Node
         }
 };
 template <typename U>
-class DoublyLinkedList
-{
+class DoublyLinkedList {
     //   head=>><1>==><2>==>head
     public:
         Node<U> *head;
@@ -85,6 +89,7 @@ class Solution {
         vector<int> topKFrequent(vector<int>& nums, int k) {
             unordered_map<int,pair<int,pair<Node<LeadboardNode>*,RankListElement*>>> con;  //unordered_map<element,pair<occurence,pair<rank,positionIntheRankList>>>
             DoublyLinkedList<LeadboardNode> leaderBoard;   ////Position = rank;
+            pair<int,pair<Node<LeadboardNode>*,RankListElement*>>* it;
             //add first element
             LeadboardNode* tmpO=new LeadboardNode();
             //Then add it to the new rank
@@ -92,62 +97,78 @@ class Solution {
             tmpO->second.push(nums[0]) ;                //Push the current element to the new rank list
             leaderBoard.push(*tmpO);               //Add the new rank to the leaderboard as a higher rank comparing
             //Update the data of the current element
-            con[nums[0]].second.first=leaderBoard.head->right;            //update its rank
-            con[nums[0]].second.second=leaderBoard.head->right->data.second.head->right;     //Update its position in the rank            
+            it=&con[nums[0]];
+            it->second.first=leaderBoard.head->right;            //update its rank
+            it->second.second=leaderBoard.head->right->data.second.head->right;     //Update its position in the rank            
+            it->first=1;
             //Iterate through array
             for(int i=1;i<nums.size();++i)
             {
-                con[nums[i]].first++; //increase occurence
-                if(con[nums[i]].first>1)//Is this a new unique value, >1 means no?
+                it=&(con[nums[i]]);
+                it->first++; //increase occurence
+                if(it->first>1)//Is this a new unique value, >1 means no?
                 {
-                    if(leaderBoard.isTop(con[nums[i]].second.first))   //if the element is in the first rank
+                    if(leaderBoard.isTop(it->second.first))   //if the element is in the first rank
                     {
-                        if(con[nums[i]].second.first->data.second.size!=1)  //This rank has more than one element?, !=1 means no
+                        if(it->second.first->data.second.size!=1)  //This rank has more than one element?, !=1 means yes
                         {
                             //First remove the element out of the current rank
-                            con[nums[i]].second.first->data.second.remove(con[nums[i]].second.second);
+                            it->second.first->data.second.remove(it->second.second);
                             //Create a new rank
                             LeadboardNode* tmp=new LeadboardNode();
                             //Then add it to the new rank
-                            tmp->first=con[nums[i]].first;      //set Occurence of the new rank equals to the current element
+                            tmp->first=it->first;      //set Occurence of the new rank equals to the current element
                             tmp->second.push(nums[i]) ;                //Push the current element to the new rank list
                             leaderBoard.push(*tmp);               //Add the new rank to the leaderboard as a higher rank comparing
                             //Update the data of the current element
-                            con[nums[i]].second.first=leaderBoard.head->right;            //update its rank
-                            con[nums[i]].second.second=leaderBoard.head->right->data.second.head->right;     //Update its position in the rank
+                            it->second.first=leaderBoard.head->right;            //update its rank
+                            it->second.second=leaderBoard.head->right->data.second.head->right;     //Update its position in the rank
                         }
                         else    //This rank has only one element
                         {
                             //increase the rank's occurrence
-                            cout<<i<<endl;
-                            con[nums[i]].second.first->data.first++;
+                            it->second.first->data.first++;
                         }
                     }
                     else    //The elemenent is not in the first rank
                     {
-                        if(con[nums[i]].first==con[nums[i]].second.first->left->data.first)    //If the element occurence equals to the higher rank
+                        if(it->first==it->second.first->left->data.first)    //If the element occurence equals to the higher rank
                         {
                             //Remove the element out of the current rank
-                            con[nums[i]].second.first->data.second.remove(con[nums[i]].second.second);
+                            it->second.first->data.second.remove(it->second.second);
                             //and add it to the next higher rank
-                            con[nums[i]].second.first->left->data.second.push(nums[i]);
+                            it->second.first->left->data.second.push(nums[i]);
+                            //Save the handle to the current rank before updating the elemenent
+                            auto save=it->second.first;
                             //Save changes into the current element
-                            con[nums[i]].second.first=con[nums[i]].second.first->left;    //Update rank
-                            con[nums[i]].second.second=con[nums[i]].second.first->data.second.head->left;  //Update position
+                            it->second.first=it->second.first->left;    //Update rank
+                            it->second.second=it->second.first->data.second.head->right;  //Update position
+                            if(!save->data.second.size)    //if the current rank became empty, remove the rank
+                            {
+                                leaderBoard.remove(save);
+                            }
                         }
                         else    //the element occurence is smaller than the higher rank
                         {
-                            //First remove the element out of the current rank
-                            con[nums[i]].second.first->data.second.remove(con[nums[i]].second.second);
-                            //Create a new rank
-                            LeadboardNode* tmp=new LeadboardNode();
-                            //Then add it to the new rank
-                            tmp->first=con[nums[i]].first;      //set Occurence of the new rank equals to the current element
-                            tmp->second.push(nums[i]) ;                //Push the current element to the new rank list
-                            leaderBoard.addLeft(con[nums[i]].second.first,*tmp);               //Add the new rank to the leaderboard as a higher rank comparing
-                            //Update the data of the current element
-                            con[nums[i]].second.first=con[nums[i]].second.first->left;    //Update rank
-                            con[nums[i]].second.second=con[nums[i]].second.first->data.second.head->left;  //Update position
+                            if(it->second.first->data.second.size==1)   //The rank has only one element
+                            {
+                                //Incrase the rank occurence
+                                it->second.first->data.first++;
+                            }
+                            else    //The rank has more than 1 element
+                            {
+                                //First remove the element out of the current rank
+                                it->second.first->data.second.remove(it->second.second);
+                                //Create a new rank
+                                LeadboardNode* tmp=new LeadboardNode();
+                                //Then add it to the new rank
+                                tmp->first=it->first;      //set Occurence of the new rank equals to the current element
+                                tmp->second.push(nums[i]) ;                //Push the current element to the new rank list
+                                leaderBoard.addLeft(it->second.first,*tmp);               //Add the new rank to the leaderboard as a higher rank comparing
+                                //Update the data of the current element
+                                it->second.first=it->second.first->left;    //Update rank
+                                it->second.second=it->second.first->data.second.head->right;  //Update position
+                            }
                         }
                     }
                 }
@@ -159,8 +180,8 @@ class Solution {
                         //Add this new element to this rank
                         leaderBoard.head->left->data.second.push(nums[i]);
                         //Save changes to the element 
-                        con[nums[i]].second.first=leaderBoard.head->left;   //update the rank
-                        con[nums[i]].second.second=leaderBoard.head->left->data.second.head->left;  //update position
+                        it->second.first=leaderBoard.head->left;   //update the rank
+                        it->second.second=leaderBoard.head->left->data.second.head->right;  //update position
                     }
                     else    //if last rank does not have occurence of 1
                     {
@@ -171,27 +192,42 @@ class Solution {
                         tmp->second.push(nums[i]) ;                //Push the current element to the new rank list
                         leaderBoard.addLeft(leaderBoard.head,*tmp);               //Add the new rank to the leaderboard as the lowest rank
                         //Update the data of the current element
-                        con[nums[i]].second.first=leaderBoard.head->left;   //update the rank
-                        con[nums[i]].second.second=leaderBoard.head->left->data.second.head->left;  //update position
+                        it->second.first=leaderBoard.head->left;   //update the rank
+                        it->second.second=leaderBoard.head->left->data.second.head->right;  //update position
                     }
                 }
                 //cout<<leaderBoard.head->right->data.first<<endl;
             }
             vector<int> result;
+            auto itRank=leaderBoard.head->right;
+            auto itRankElement=itRank->data.second.head->right;
             for(;k>0;)
             {
-                auto itRank=leaderBoard.head->right;
-                auto itRankElement=itRank->data.second.head->right;
-                for(int i=k;i>0;k=--i)
+                for(;k>0;)
                 {
+                    --k;
+                	// cout<<k<<endl;
+                	// cout<<itRank->data.first<<endl;
                     result.push_back(itRankElement->data);
                     itRankElement=itRankElement->right;
                     if(itRankElement==itRank->data.second.head)
                         break;
                 }
                 itRank=itRank->right;
+                itRankElement=itRank->data.second.head->right;
                 
             }
             return result;
         }
 };
+int main()
+{
+	Solution a;
+	int c[]={1,2,3,1,2,1,2,3,4};
+	vector<int> b(begin(c),end(c));
+	auto rs=a.topKFrequent(b, 4);
+	for(auto it=rs.begin();it!=rs.end();++it)
+	{
+		cout<<*it<<" ";
+	}
+}
