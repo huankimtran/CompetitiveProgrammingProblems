@@ -13,6 +13,13 @@ Note:
 You may assume k is always valid, 1 ≤ k ≤ number of unique elements.
 Your algorithm's time complexity must be better than O(n log n), where n is the array's size.
 */
+/*		Algorithm Explaination
+Use a DoublyLinkedList to hold the rank
+Each element in rank list contains the occurence of items in that rank (All item in a rank have the same occurence) and also the items themself
+Do one pass through the given array, at each iterration, increase the occurence of the item and adjust the position of the item in the rank table.
+All operation is O(1) time complexity, no random access needed since items are only added to front of the back or deleted.
+Time complexity in worst case is O(n)
+*/
 #include "iostream"
 #include "unordered_map"
 #include "vector"
