@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "*.world": "xml",
+        "ostream": "cpp",
+        "bitset": "cpp",
+        "cstdlib": "cpp",
+        "algorithm": "cpp",
+        "functional": "cpp",
+        "regex": "cpp"
+    }
+}
