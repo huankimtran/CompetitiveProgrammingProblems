@@ -1,0 +1,7 @@
+SHELL= /bin/sh
+CC = g++
+OUTPUT_FILE_NAME= main.o
+SOURCE_FILE= main.cpp
+
+$(OUTPUT_FILE_NAME) : $(SOURCE_FILE)
+	$(CC) -o $(OUTPUT_FILE_NAME) $(SOURCE_FILE)
